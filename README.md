@@ -1,38 +1,73 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<a name="readme-top"></a>
+<br />
 
-## Getting Started
+<div align="center" >
+  <a href="https://codecamp-n.com">
+    <img src="images/codecamp_n.png" style="background:white;" height="80" alt="Codecamp:n">
+  </a>
 
-First, run the development server:
+  <h3 align="center">Scrum Story generator using OpenAI and Azure SpeechSDK</h3>
+
+  <p align="center">
+    A little showcase how to combine different SDKs to build AI driven MVPs.
+  </p>
+</div>
+<br/>
+
+# About
+
+This repository contains a simple [Next.js](https://nextjs.org) app that forwards your microphone input to the Microsoft Speech-to-Text SDK. On pressing 'Generate Story' the text will be passed to OpenAIs davinci-03 model with an instruction to create a scrum user story.
+
+> It is _not_ intended as a production ready application and there's a lot of room for improvement in the code base. But maybe it helps you kickstart your ideas!
+
+# Local setup
+
+## Prerequisites
+
+- An Azure Speect-to-Text SDK key
+- An OpenAI SDK Key
+- NodeJS >= 19
+
+## 1. Get an Azure speech SDK
+
+You can use the Speech-to-Text SDK from azure **for free** with limitations. You can basically follow the prerequisites from this tutorial:
+
+https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/get-started-speech-to-text
+
+## 2. Get an OpenAI SDK Key
+
+OpenAI allows you to spend 18$ in the first free months without providing a payment provider.
+
+Create an account here: https://openai.com/ and create an API key here: https://platform.openai.com/account/api-keys
+
+## 3. Install dependencies
+
+You can use yarn or npm
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+yarn
+
+#-- or --
+
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 4. Create an env file containing your keys
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy the env file template to .env
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```bash
+cp ./.env.dist .env
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Open .env in your editor and set `AZURE_SPEECH_SDK_KEY` and `OPENAI_KEY` with the keys from step 1 and 2.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 5. Build and run
 
-## Learn More
+> You can also use yarn dev, but keep in mind that calling some endpoints the first time can trigger a rebuild and clear your azure sessions.
 
-To learn more about Next.js, take a look at the following resources:
+`yarn build && yarn start`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 6. Open in your Browser
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The default port is 8080, so you can simply open localhost:8080.

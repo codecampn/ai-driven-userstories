@@ -1,38 +1,22 @@
-import sessionStore from "@/src/recognition/session/session";
+import { createJIRATicket } from "@/src/server/openai";
+import { sessionStore } from "@/src/server/recognition/session";
+import { Session } from "@/src/server/recognition/session/types";
 import { NextApiHandler } from "next";
-import { Configuration, OpenAIApi } from "openai";
-import axios from "axios";
-import process from "node:process";
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAPI_KEY,
-});
-const openai = new OpenAIApi(configuration);
+import { bufferTime, lastValueFrom, map, take } from "rxjs";
 
 const handleGet: NextApiHandler = async (req, res) => {
   const { sessionId } = req.query;
   const state = sessionStore.get(sessionId as string);
-
   if (!state) {
     res.status(404).end();
     return;
   }
   try {
-    const result = await openai.createCompletion({
-      model: "text-davinci-003",
-      max_tokens: 3000,
-      temperature: 0.4,
-      prompt: `Create a scrum user story (in german) from the following requirements with a story, requirements and acceptance criteria: ${state.textStream.join()}`,
-    });
-
-    res.send(result.data.choices[0].text);
-    res.status(200).end();
+    const text = await textFromStream(state);
+    const result = await createJIRATicket(text);
+    res.status(200).end(result);
   } catch (e) {
-    if (axios.isAxiosError(e)) {
-      console.error(e.response?.data);
-      res.send({ error: e.response?.data });
-    }
-    res.status(500).end();
+    res.status(500).end({ message: String(e) });
   }
 };
 
@@ -47,3 +31,12 @@ const handler: NextApiHandler = async (req, res) => {
 };
 
 export default handler;
+async function textFromStream(state: Session) {
+  return await lastValueFrom(
+    state.textStream.pipe(
+      bufferTime(0),
+      take(1),
+      map((x) => x.join("\n"))
+    )
+  );
+}

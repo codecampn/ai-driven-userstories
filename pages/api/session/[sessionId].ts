@@ -1,18 +1,16 @@
-import sessionStore from "@/src/recognition/session";
-import { NextApiHandler } from "next";
-import { Readable, Writable } from "node:stream";
+import { sessionStore } from "@/src/server/recognition/session";
+import { NextApiHandler, NextConfig } from "next";
+import { Readable } from "node:stream";
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-export const sleep = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const convertAndWriteToStream = (stream: Readable, writable: Readable) => {
   stream.on("data", (data) => {
-    console.log("push");
     writable.push(data);
   });
 };
@@ -48,8 +46,27 @@ const handleGet: NextApiHandler = async (req, res) => {
     res.status(404).end();
     return;
   }
-  res.send(JSON.stringify(entry.textStream));
-  res.status(200).end();
+  res.status(200);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "text/event-stream;charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+  await new Promise((done, err) => {
+    entry.textStream.subscribe({
+      next: (text) => {
+        res.write(`data: ${JSON.stringify(text)}\n\n`);
+      },
+      complete: () => {
+        console.log("done");
+        done(null);
+      },
+      error: (error) => {
+        console.log("error");
+        err(error);
+      },
+    });
+  });
 };
 
 const handler: NextApiHandler = async (req, res) => {
