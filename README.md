@@ -11,6 +11,8 @@
   <p align="center">
     A little showcase how to combine different SDKs to build AI driven MVPs.
   </p>
+
+  <img src="./images/demo.gif" alt="demo">
 </div>
 <br/>
 
