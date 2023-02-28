@@ -1,3 +1,4 @@
+import { logger } from "@/src/logger";
 import {
   AudioConfig,
   CancellationReason,
@@ -16,15 +17,19 @@ export const AzureSpeechTranscriberObservable = {
     const recognitionStream = new Subject<RecognitionPayload>();
     const recognizingStream = new Subject<RecognitionPayload>();
     recognizer.recognized = (_sender, event) => {
-      console.log("Recognized", event.result.text);
+      logger.debug({ event }, "Recognized");
       recognitionStream.next({ type: "recognized", recognized: event.result.text });
     };
     recognizer.recognizing = (_sender, event) => {
-      console.log("Recognizing", event.result.text);
+      logger.debug({ event }, "Recognizing");
       recognizingStream.next({ type: "recognizing", recognized: event.result.text });
     };
     recognizer.canceled = (_sender, event) => {
-      console.log("Cancelled", event.reason);
+      logger.info(
+        { reason: event.reason, message: event.errorDetails, code: event.errorCode },
+        "Cancelled",
+        event.reason
+      );
       if (event.reason === CancellationReason.Error) {
         recognitionStream.error({ message: event.errorDetails, details: event });
       }

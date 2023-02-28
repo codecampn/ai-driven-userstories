@@ -1,3 +1,4 @@
+import { logger } from "@/src/logger";
 import { sessionStore } from "@/src/server/recognition/session";
 import { NextApiHandler, NextConfig } from "next";
 import { Readable } from "node:stream";
@@ -58,11 +59,11 @@ const handleGet: NextApiHandler = async (req, res) => {
         res.write(`data: ${JSON.stringify(text)}\n\n`);
       },
       complete: () => {
-        console.log("done");
+        logger.info("Closing eventstream");
         done(null);
       },
       error: (error) => {
-        console.log("error");
+        logger.error({ error }, "Error in Eventstream");
         err(error);
       },
     });

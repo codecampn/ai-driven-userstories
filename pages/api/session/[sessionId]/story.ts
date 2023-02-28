@@ -1,4 +1,4 @@
-import { createJIRATicket } from "@/src/server/openai";
+import { createStory } from "@/src/server/openai";
 import { sessionStore } from "@/src/server/recognition/session";
 import { Session } from "@/src/server/recognition/session/types";
 import { NextApiHandler } from "next";
@@ -13,7 +13,7 @@ const handleGet: NextApiHandler = async (req, res) => {
   }
   try {
     const text = await textFromStream(state);
-    const result = await createJIRATicket(text);
+    const result = await createStory(text);
     res.status(200).end(result);
   } catch (e) {
     res.status(500).end({ message: String(e) });
@@ -30,7 +30,6 @@ const handler: NextApiHandler = async (req, res) => {
   }
 };
 
-export default handler;
 async function textFromStream(state: Session) {
   return await lastValueFrom(
     state.textStream.pipe(
@@ -40,3 +39,5 @@ async function textFromStream(state: Session) {
     )
   );
 }
+
+export default handler;

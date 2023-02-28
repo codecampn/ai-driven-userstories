@@ -1,4 +1,5 @@
 import { azureBackend, transcodeBackend } from "@/src/config";
+import { logger } from "@/src/logger";
 import { createSpeechSession, sessionStore } from "@/src/server/recognition/session";
 import type { NextApiHandler } from "next";
 import { v4 } from "uuid";
@@ -7,8 +8,9 @@ const handler: NextApiHandler = (req, res) => {
   if (req.method === "PUT") {
     const id = v4();
     const session = createSpeechSession({ azureBackend, transcodeBackend });
+
     req.on("close", () => {
-      console.log("Client aborted, closing session");
+      logger.info("Client aborted, closing session");
       session.close();
       sessionStore.delete(id);
     });

@@ -11,10 +11,12 @@ const SPEECH_SDK_KEY = getEnv.get("AZURE_SPEECH_SDK_KEY").required().asString();
 const SPEECH_SDK_REGION = getEnv.get("AZURE_SPEECH_SDK_REGION").required().asString();
 const SPEECH_SDK_LANGUAGE = getEnv.get("AZURE_SPEECH_SDK_LANGUAGE").default("en-US").asString();
 const OPENAI_KEY = getEnv.get("OPENAI_KEY").required().asString();
+const OPENAI_PROMPT = getEnv.get("OPENAI_PROMPT").required().asString();
 
 const speechConfig = SpeechConfig.fromSubscription(SPEECH_SDK_KEY, SPEECH_SDK_REGION);
 speechConfig.speechRecognitionLanguage = SPEECH_SDK_LANGUAGE;
 
+export const openAiPrompt = OPENAI_PROMPT;
 export const transcodeBackend = createWebMAzureBackend();
 export const azureBackend = AzureRecognizerBackend({
   azureConfig: speechConfig,

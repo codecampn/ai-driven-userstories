@@ -1,29 +1,31 @@
+import { logger } from "@/src/logger";
 import { AudioConfig, AudioInputStream, AudioStreamFormat, SpeechConfig } from "microsoft-cognitiveservices-speech-sdk";
-import { connectable, filter, finalize, map, tap } from "rxjs";
+import { filter, finalize, map, tap } from "rxjs";
 import type { VoiceRecognitionBackend } from "../voice-recognition-backend";
 import { AzureSpeechTranscriberObservable } from "./observable-speech-transcriber";
 
 export const AzureRecognizerBackend =
   (config: AzureSpeechConfig): VoiceRecognitionBackend =>
   (audioStream) => {
-    console.log("Creating new push stream");
+    logger.debug("Creating new audio stream");
     const pushStream = AudioInputStream.createPushStream(createAudioFormat(config));
     const stream = AzureSpeechTranscriberObservable.fromConfig(
       config.azureConfig,
       AudioConfig.fromStreamInput(pushStream)
     );
-    const connectStream = connectable(stream);
-    connectStream.connect();
     audioStream
       .pipe(
-        finalize(() => pushStream.close()),
+        finalize(() => {
+          logger.info("Closing audio stream");
+          pushStream.close();
+        }),
         tap((buffer) => pushStream.write(buffer))
       )
       .subscribe();
 
-    return connectStream.pipe(
+    return stream.pipe(
       filter((recognized) => recognized.type === "recognized"),
-      tap(console.log),
+      finalize(() => logger.info("Closed audio stream")),
       map((recognized) => recognized.recognized)
     );
   };

@@ -6,7 +6,7 @@ export const StoryDisplay = (props: TextDisplayProps) => {
   const [result, setResult] = useState<string>();
   useEffect(() => {
     (async () => {
-      const result = await fetch(`/api/session/${props.sessionId}/jira`).then((x) => x.text());
+      const result = await fetch(`/api/session/${props.sessionId}/story`).then((x) => x.text());
       setResult(result);
     })();
   }, [props.sessionId]);

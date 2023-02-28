@@ -15,7 +15,6 @@ export const TextDisplay = (props: TextDisplayProps) => {
         filter(Boolean)
       )
       .subscribe((message) => {
-        console.log(message, textMessages, [...textMessages, message]);
         setTextMessages((state) => [...state, message]);
       });
     return () => {

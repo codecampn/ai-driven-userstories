@@ -1,9 +1,11 @@
+import { logger } from "@/src/logger";
 import { AudioBackend } from "@/src/server/audio/audio-backend";
-import { shareReplay, Subject, takeUntil } from "rxjs";
+import { debounceTime, shareReplay, Subject, take, takeUntil } from "rxjs";
 import { Duplex } from "stream";
 import { VoiceRecognitionBackend } from "../voice-recognition-backend";
 import { Session } from "./types";
 
+const timeout = 30000;
 export const createSpeechSession = ({ transcodeBackend, azureBackend }: SessionConfig): Session => {
   try {
     const transform = new Duplex({
@@ -20,6 +22,15 @@ export const createSpeechSession = ({ transcodeBackend, azureBackend }: SessionC
       transcoder.next(data);
     });
     const closed = new Subject();
+
+    transcoder.pipe(debounceTime(timeout), take(1)).subscribe(() => {
+      logger.warn({ timeout }, "No audio received for, closing session");
+      closed.next(true);
+      bufferStream.destroy();
+      transcoder.complete();
+
+      logger.warn("Session closed, closing session");
+    });
     const result = azureBackend(transcoder).pipe(takeUntil(closed), shareReplay());
     return {
       stream: transform,
@@ -27,6 +38,7 @@ export const createSpeechSession = ({ transcodeBackend, azureBackend }: SessionC
 
       close: () => {
         closed.next(null);
+        transcoder.complete();
         transform.destroy();
       },
     };

@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/src/logger";
 import { useEffect, useState } from "react";
 
 export const SocketStream = (props: SocketStreamProps) => {
@@ -10,6 +11,7 @@ export const SocketStream = (props: SocketStreamProps) => {
       return;
     }
     props.onSession(session);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   const requestNewSession = (): AbortController => {
@@ -20,19 +22,19 @@ export const SocketStream = (props: SocketStreamProps) => {
       .then((result) => result.json())
       .then(({ id }) => {
         if (abortController.signal.aborted) {
-          console.log("Aborted");
+          logger.info({ id }, "Aborted session");
           deleteSession(id);
           return;
         }
         setSession(id);
-        console.log("Got session", session);
+        logger.info({ session }, "Created session");
       });
 
     return abortController;
   };
 
   const deleteSession = async (sessionToDelete: string) => {
-    console.log("Deleting session", sessionToDelete);
+    logger.info({ session: sessionToDelete }, "Deleting session");
     await fetch("/api/session/" + sessionToDelete, {
       method: "DELETE",
     });
@@ -53,7 +55,7 @@ export const SocketStream = (props: SocketStreamProps) => {
     if (!session || !props.stream) {
       return;
     }
-    console.log("Starting recording");
+    logger.info({ session }, "Starting recording");
     const mediaRecorder = new MediaRecorder(props.stream, {
       mimeType: "audio/webm",
       audioBitsPerSecond: 64000,
@@ -67,7 +69,7 @@ export const SocketStream = (props: SocketStreamProps) => {
       });
     });
     return () => {
-      console.log("Stopping");
+      logger.info({ session }, "Stopping recording");
       mediaRecorder.stop();
     };
   }, [session, props.stream]);
