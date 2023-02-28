@@ -74,6 +74,3 @@ Open .env in your editor and set `AZURE_SPEECH_SDK_KEY` and `OPENAI_KEY` with th
 
 The default port is 8080, so you can simply open localhost:8080.
 
-# Questions?
-
-If you have any questions, feel free to
