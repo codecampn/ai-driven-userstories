@@ -2,11 +2,7 @@
 import { StoryDisplay } from "@/src/components/stream/StoryDisplay";
 import { TextDisplay } from "@/src/components/stream/TextDisplay";
 import { AudioRecorder } from "@/src/components/webaudio/AudioRecorder";
-import { Inter } from "@next/font/google";
 import { useState } from "react";
-import styles from "./page.module.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const [record, setRecord] = useState(false);
